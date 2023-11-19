@@ -1,0 +1,26 @@
+{
+    "enableConsole": true,
+    "enableLogger": true,
+    "dumpIl2Cpp": false,
+    "dumpStaticEntries": false,
+	"dumpLocalization": true,
+    "maxFps": 144,
+    "unlockSize": true,
+    "uiScale": 1,
+    "uiAnimationScale": 1.0,
+    "resolution3dScale": 2,
+    "replaceToBuiltinFont": false,
+    "replaceToCustomFont": true,
+    "fontAssetBundlePath": "custom_font/fonts",
+    "fontAssetName": "GyeonggiTitle_Medium.fontsettings",
+    "tmproFontAssetName": "GyeonggiTitleM_HummingProN-D SDF",
+    "antiAliasing": 8,
+    "discordRichPresence": true,
+    "customTitleName": "우마무스메 프리티더비",
+    "replaceAssetsPath": "replace_assets",
+    "replaceAssetBundleFilePaths": [],
+	"localizationJsonPath": "localized_data/localization.json",
+    "dicts": [
+        "localized_data/static.json"
+    ]
+}
