@@ -610,6 +610,13 @@ namespace
 
 	Il2CppObject* TMP_Text_GetTextElement_hook(Il2CppObject* _this, uint32_t unicode, Il2CppObject* fontAsset, int fontStyle, int fontWeight, bool* isUsingAlternativeTypeface)
 	{
+		auto enableVertexGradient = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(_this->klass, "get_enableVertexGradient", 0)->methodPointer(_this);
+
+		if ((enableVertexGradient && uobject_get_name(_this)->start_char == L"Name"s) || uobject_get_name(_this)->start_char == L"NickName"s)
+		{
+			return reinterpret_cast<decltype(TMP_Text_GetTextElement_hook)*>(TMP_Text_GetTextElement_orig)(_this, unicode, fontAsset, fontStyle, fontWeight, isUsingAlternativeTypeface);
+		}
+
 		static auto customFont = GetCustomTMPFont();
 
 		return reinterpret_cast<decltype(TMP_Text_GetTextElement_hook)*>(TMP_Text_GetTextElement_orig)(_this, unicode, customFont, fontStyle, fontWeight, isUsingAlternativeTypeface);
@@ -631,6 +638,15 @@ namespace
 	void UITextMeshProUGUI_Awake_hook(Il2CppObject* _this)
 	{
 		reinterpret_cast<decltype(UITextMeshProUGUI_set_text_hook)*>(UITextMeshProUGUI_set_text_orig)(_this, UITextMeshProUGUI_get_text_hook(_this));
+
+		auto enableVertexGradient = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(_this->klass, "get_enableVertexGradient", 0)->methodPointer(_this);
+
+		if ((enableVertexGradient && uobject_get_name(_this)->start_char == L"Name"s) || uobject_get_name(_this)->start_char == L"NickName"s)
+		{
+			auto fontAssetField = il2cpp_class_get_field_from_name(_this->klass, "m_fontAsset");
+
+			il2cpp_field_set_value(_this, fontAssetField, GetCustomTMPFont());
+		}
 
 		reinterpret_cast<decltype(UITextMeshProUGUI_Awake_hook)*>(UITextMeshProUGUI_Awake_orig)(_this);
 	}
@@ -2209,20 +2225,6 @@ namespace
 		auto on_populate_addr = il2cpp_symbols::get_method_pointer(
 			"UnityEngine.UI.dll", "UnityEngine.UI",
 			"Text", "OnPopulateMesh", 1
-		);
-
-		auto TMP_Settings_get_instance_addr = il2cpp_symbols::get_method_pointer(
-			"Unity.TextMeshPro.dll", "TMPro", "TMP_Settings", "get_instance", -1);
-
-		auto TMP_Settings_GetFontAsset_addr = il2cpp_symbols::get_method_pointer(
-			"Unity.TextMeshPro.dll", "TMPro", "TMP_Settings", "GetFontAsset", -1);
-
-		auto TMP_Settings_get_defaultFontAsset_addr = il2cpp_symbols::get_method_pointer(
-			"Unity.TextMeshPro.dll", "TMPro", "TMP_Settings", "get_defaultFontAsset", -1);
-
-		auto TextMeshProUGUI_LoadFontAsset_addr = il2cpp_symbols::get_method_pointer(
-			"Unity.TextMeshPro.dll", "TMPro",
-			"TextMeshProUGUI", "LoadFontAsset", 0
 		);
 
 		auto TMP_Text_GetTextElement_addr = il2cpp_symbols::get_method_pointer(

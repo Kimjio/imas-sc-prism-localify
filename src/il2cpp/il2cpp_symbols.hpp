@@ -42,6 +42,15 @@ public:
 	unsigned int rgba;
 };
 
+struct VertexGradient_t
+{
+public:
+	Color_t topLeft;
+	Color_t topRight;
+	Color_t bottomLeft;
+	Color_t bottomRight;
+};
+
 
 // UnityEngine.ScreenOrientation
 enum class ScreenOrientation {
