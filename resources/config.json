@@ -1,26 +1,27 @@
 {
-    "enableConsole": true,
-    "enableLogger": true,
+    "enableConsole": false,
+    "enableLogger": false,
     "dumpIl2Cpp": false,
     "dumpStaticEntries": false,
-	"dumpLocalization": true,
+    "dumpLocalization": false,
+    "dumpTexture": false,
     "maxFps": 144,
     "unlockSize": true,
     "uiScale": 1,
     "uiAnimationScale": 1.0,
-    "resolution3dScale": 2,
-    "replaceToBuiltinFont": false,
-    "replaceToCustomFont": true,
-    "fontAssetBundlePath": "custom_font/fonts",
-    "fontAssetName": "GyeonggiTitle_Medium.fontsettings",
-    "tmproFontAssetName": "GyeonggiTitleM_HummingProN-D SDF",
+    "resolution3dScale": 1,
+    "replaceToCustomFont": false,
+    "_fontAssetBundlePath": "custom_font/fonts",
+    "_fontAssetName": "GyeonggiTitle_Medium.fontsettings",
+    "_tmproFontAssetName": "GyeonggiTitleM_HummingProN-D SDF",
     "antiAliasing": 8,
-    "discordRichPresence": true,
-    "customTitleName": "우마무스메 프리티더비",
-    "replaceAssetsPath": "replace_assets",
-    "replaceAssetBundleFilePaths": [],
-	"localizationJsonPath": "localized_data/localization.json",
-    "dicts": [
+    "customTitleName": "THE iDOLM@STER SC SONG for PRISM",
+    "_replaceAssetsPath": "replace_assets",
+    "_replaceAssetBundleFilePaths": [
+        "replace_assets/replace_assets"
+    ],
+    "_localizationJsonPath": "localized_data/localization.json",
+    "_dicts": [
         "localized_data/static.json"
     ]
 }
