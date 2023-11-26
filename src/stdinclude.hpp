@@ -48,7 +48,6 @@ extern bool g_unlock_size;
 extern float g_ui_scale;
 extern float g_ui_animation_scale;
 extern float g_resolution_3d_scale;
-extern bool g_replace_to_builtin_font;
 extern bool g_replace_to_custom_font;
 extern std::string g_font_assetbundle_path;
 extern std::string g_font_asset_name;
@@ -58,7 +57,6 @@ extern std::string g_custom_title_name;
 extern std::unordered_map<std::string, ReplaceAsset> g_replace_assets;
 extern std::string g_replace_assetbundle_file_path;
 extern std::vector<std::string> g_replace_assetbundle_file_paths;
-extern bool g_discord_rich_presence;
 
 extern rapidjson::Document localization_dict;
 

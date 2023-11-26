@@ -585,13 +585,6 @@ namespace
 	void* on_populate_orig = nullptr;
 	void on_populate_hook(Il2CppObject* _this, void* toFill)
 	{
-		if (g_replace_to_builtin_font && text_get_linespacing(_this) != 1.05f)
-		{
-			text_set_style(_this, 1);
-			text_set_size(_this, text_get_size(_this) - 4);
-			text_set_linespacing(_this, 1.05f);
-		}
-
 		if (g_replace_to_custom_font)
 		{
 			auto font = text_get_font(_this);
@@ -2385,6 +2378,12 @@ namespace
 		reinterpret_cast<decltype(CatalogDB_ctor_hook)*>(CatalogDB_ctor_orig)(_this, filePath, seed);
 	}
 
+	void* TweenManager_Update_orig = nullptr;
+	void* TweenManager_Update_hook(Il2CppObject* _this, void* updateType, float deltaTime, float independentTime)
+	{
+		return reinterpret_cast<decltype(TweenManager_Update_hook)*>(TweenManager_Update_orig)(_this, updateType, deltaTime * g_ui_animation_scale, independentTime * g_ui_animation_scale);
+	}
+
 	void* load_scene_internal_orig = nullptr;
 	void* load_scene_internal_hook(Il2CppString* sceneName, int sceneBuildIndex, void* parameters, bool mustCompleteNextFrame)
 	{
@@ -2659,10 +2658,6 @@ namespace
 			"UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle",
 			"LoadFromFile", 3);
 
-		auto PathResolver_GetLocalPath_addr = il2cpp_symbols::get_method_pointer(
-			"_Cyan.dll", "Cyan.LocalFile", "PathResolver",
-			"GetLocalPath", 2);
-
 		Shader_PropertyToID = il2cpp_symbols::get_method_pointer<int (*)(Il2CppString*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Shader", "PropertyToID", 1);
 
 		auto CriMana_Player_SetFile_addr = il2cpp_symbols::get_method_pointer("CriMw.CriWare.Runtime.dll", "CriWare.CriMana", "Player", "SetFile", 3);
@@ -2672,6 +2667,10 @@ namespace
 		auto CatalogDB_ctor_addr = il2cpp_symbols::get_method_pointer(
 			"Limelight.Runtime.dll", "Limelight", "CatalogDB",
 			".ctor", 2);
+
+		auto TweenManager_Update_addr = il2cpp_symbols::get_method_pointer(
+			"DOTween.dll", "DG.Tweening.Core", "TweenManager", "Update", 3
+		);
 
 		auto LocalizationManager_LoadAsync_addr = il2cpp_symbols::get_method_pointer(
 			"ENTERPRISE.Localization.dll", "ENTERPRISE.Localization", "LocalizationManager",
@@ -2727,12 +2726,14 @@ namespace
 		ADD_HOOK(UITextMeshProUGUI_get_text_RawImage_get_texture_Image_get_sprite, "ENTERPRISE.UI.UITextMeshProUGUI::get_text\nUnityEngine.UI.Image::get_sprite\nUnityEngine.UI.RawImage::get_texture at %p\n");
 		ADD_HOOK(UITextMeshProUGUI_set_text, "ENTERPRISE.UI.UITextMeshProUGUI::set_text at %p\n");
 
+		ADD_HOOK(TweenManager_Update, "DG.Tweening.Core.TweenManager::Update at %p\n");
+
 		if (g_unlock_size)
 		{
 			ADD_HOOK(canvas_scaler_setres, "UnityEngine.UI.CanvasScaler::set_referenceResolution at %p\n");
 		}
 
-		if (g_replace_to_builtin_font || g_replace_to_custom_font)
+		if (g_replace_to_custom_font)
 		{
 			ADD_HOOK(on_populate, "UnityEngine.UI.Text::OnPopulateMesh at %p\n");
 			ADD_HOOK(UITextMeshProUGUI_Awake, "ENTERPRISE.UI.UITextMeshProUGUI::Awake at %p\n");

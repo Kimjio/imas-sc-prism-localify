@@ -17,7 +17,6 @@ bool g_unlock_size = false;
 float g_ui_scale = 1.0f;
 float g_ui_animation_scale = 1.0f;
 float g_resolution_3d_scale = 1.0f;
-bool g_replace_to_builtin_font = false;
 bool g_replace_to_custom_font = false;
 std::string g_font_assetbundle_path;
 std::string g_font_asset_name;
@@ -27,7 +26,6 @@ std::string g_custom_title_name;
 std::unordered_map<std::string, ReplaceAsset> g_replace_assets;
 std::string g_replace_assetbundle_file_path;
 std::vector<std::string> g_replace_assetbundle_file_paths;
-bool g_discord_rich_presence = false;
 
 rapidjson::Document localization_dict;
 
@@ -113,14 +111,6 @@ namespace
 			{
 				g_resolution_3d_scale = document["resolution3dScale"].GetFloat();
 			}
-			if (document.HasMember("replaceFont"))
-			{
-				g_replace_to_builtin_font = document["replaceFont"].GetBool();
-			}
-			if (!document.HasMember("replaceFont") && document.HasMember("replaceToBuiltinFont"))
-			{
-				g_replace_to_builtin_font = document["replaceToBuiltinFont"].GetBool();
-			}
 			if (document.HasMember("replaceToCustomFont"))
 			{
 				g_replace_to_custom_font = document["replaceToCustomFont"].GetBool();
@@ -182,11 +172,6 @@ namespace
 					auto value = it->GetString();
 					g_replace_assetbundle_file_paths.emplace_back(value);
 				}
-			}
-
-			if (document.HasMember("discordRichPresence"))
-			{
-				g_discord_rich_presence = document["discordRichPresence"].GetBool();
 			}
 
 			if (document.HasMember("localizationJsonPath"))
