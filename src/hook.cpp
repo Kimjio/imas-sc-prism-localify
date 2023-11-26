@@ -7,6 +7,7 @@
 
 #include <set>
 #include <sstream>
+#include <string_view>
 
 #include <Tlhelp32.h>
 
@@ -622,22 +623,50 @@ namespace
 		return reinterpret_cast<decltype(TMP_Text_GetTextElement_hook)*>(TMP_Text_GetTextElement_orig)(_this, unicode, customFont, fontStyle, fontWeight, isUsingAlternativeTypeface);
 	}
 
-	void* UITextMeshProUGUI_get_text_orig = nullptr;
-	Il2CppString* UITextMeshProUGUI_get_text_hook(Il2CppObject* _this)
-	{
-		return local::get_localized_string(reinterpret_cast<decltype(UITextMeshProUGUI_get_text_hook)*>(UITextMeshProUGUI_get_text_orig)(_this));
-	}
-
 	void* UITextMeshProUGUI_set_text_orig = nullptr;
 	void UITextMeshProUGUI_set_text_hook(Il2CppObject* _this, Il2CppString* value)
 	{
 		reinterpret_cast<decltype(UITextMeshProUGUI_set_text_hook)*>(UITextMeshProUGUI_set_text_orig)(_this, local::get_localized_string(value));
 	}
 
+	void* UITextMeshProUGUI_get_text_RawImage_get_texture_Image_get_sprite_orig = nullptr;
+	Il2CppObject* UITextMeshProUGUI_get_text_RawImage_get_texture_Image_get_sprite_hook(Il2CppObject* _this)
+	{
+		auto obj = reinterpret_cast<decltype(UITextMeshProUGUI_get_text_RawImage_get_texture_Image_get_sprite_hook)*>(UITextMeshProUGUI_get_text_RawImage_get_texture_Image_get_sprite_orig)(_this);
+
+		if (obj)
+		{
+			if (obj->klass->name == "String"s)
+			{
+				return reinterpret_cast<Il2CppObject*>(local::get_localized_string(reinterpret_cast<Il2CppString*>(obj)));
+			}
+
+			if (obj->klass->name == "Texture2D"s)
+			{
+				if (!local::wide_u8(uobject_get_name(obj)->start_char).empty())
+				{
+					auto newTexture = GetReplacementAssets(
+						uobject_get_name(obj),
+						(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
+					if (newTexture)
+					{
+						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
+							(newTexture, 32);
+						return newTexture;
+					}
+				}
+				return obj;
+			}
+		}
+
+		return obj;
+	}
+
 	void* UITextMeshProUGUI_Awake_orig = nullptr;
 	void UITextMeshProUGUI_Awake_hook(Il2CppObject* _this)
 	{
-		reinterpret_cast<decltype(UITextMeshProUGUI_set_text_hook)*>(UITextMeshProUGUI_set_text_orig)(_this, UITextMeshProUGUI_get_text_hook(_this));
+		UITextMeshProUGUI_set_text_hook(_this, reinterpret_cast<Il2CppString*>(
+			reinterpret_cast<decltype(UITextMeshProUGUI_get_text_RawImage_get_texture_Image_get_sprite_hook)*>(UITextMeshProUGUI_get_text_RawImage_get_texture_Image_get_sprite_orig)(_this)));
 
 		auto enableVertexGradient = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(_this->klass, "get_enableVertexGradient", 0)->methodPointer(_this);
 
@@ -976,8 +1005,85 @@ namespace
 			replaceAsset.asset = assets;
 			return assets;
 		}
-		return reinterpret_cast<decltype(assetbundle_LoadFromFile_hook)*>(assetbundle_LoadFromFile_orig)(path, crc, offset);
+
+		auto bundle = reinterpret_cast<decltype(assetbundle_LoadFromFile_hook)*>(assetbundle_LoadFromFile_orig)(path, crc, offset);
+		return bundle;
 	}
+
+	void DumpTexture2D(Il2CppObject* texture, string type)
+	{
+		auto textureName = local::wide_u8(uobject_get_name(texture)->start_char);
+
+		auto width = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(texture->klass, "get_width", 0)->methodPointer(texture);
+
+		auto height = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(texture->klass, "get_height", 0)->methodPointer(texture);
+
+		auto renderTexture = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(int, int, int, int, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "GetTemporary", 5)(width, height, 0, 0, 1);
+
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Graphics", "Blit", 2)(texture, renderTexture);
+
+		auto previous = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "get_active", -1)();
+
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "set_active", 1)(renderTexture);
+
+		auto readableTexture = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(readableTexture->klass, ".ctor", 2)->methodPointer(readableTexture, width, height);
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Rect_t, int, int)>(readableTexture->klass, "ReadPixels", 3)->methodPointer(readableTexture, Rect_t{ 0, 0, static_cast<float>(width), static_cast<float>(height) }, 0, 0);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(readableTexture->klass, "Apply", 0)->methodPointer(readableTexture);
+
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "set_active", 1)(previous);
+
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "ReleaseTemporary", 1)(renderTexture);
+
+		auto method = il2cpp_symbols::get_method("UnityEngine.ImageConversionModule.dll", "UnityEngine", "ImageConversion", "EncodeToPNG", 1);
+
+		void** params = new void* [1];
+		params[0] = readableTexture;
+
+		Il2CppException* exception;
+
+		auto pngData = reinterpret_cast<Il2CppArraySize_t<uint8_t>*>(il2cpp_runtime_invoke(method, nullptr, params, &exception));
+
+		if (exception)
+		{
+			il2cpp_raise_exception(exception);
+			return;
+		}
+
+		replaceAll(textureName, "|", "_");
+
+		if (!filesystem::exists("TextureDump"))
+		{
+			filesystem::create_directory("TextureDump");
+		}
+
+		if (!filesystem::exists("TextureDump/" + type))
+		{
+			filesystem::create_directory("TextureDump/" + type);
+		}
+
+		if (textureName.find(".png") == string::npos)
+		{
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*, Il2CppArraySize_t<uint8_t>*)>("mscorlib.dll", "System.IO", "File", "WriteAllBytes", 2)(il2cpp_string_new(("TextureDump/" + type + "/" + textureName + ".png").data()), pngData);
+		}
+		else
+		{
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*, Il2CppArraySize_t<uint8_t>*)>("mscorlib.dll", "System.IO", "File", "WriteAllBytes", 2)(il2cpp_string_new(("TextureDump/" + type + "/" + textureName).data()), pngData);
+		}
+	}
+
+	void* Renderer_get_material_orig;
+	Il2CppObject* Renderer_get_material_hook(Il2CppObject* _this);
+
+	void* Material_GetTextureImpl_orig;
+	Il2CppObject* Material_GetTextureImpl_hook(Il2CppObject* _this, int nameID);
+
+	struct HowToPlayPopupResourceConfig_Item
+	{
+		Il2CppObject* Image;
+		Il2CppString* Summary;
+	};
 
 	Il2CppObject* assetbundle_load_asset_hook(Il2CppObject* _this, Il2CppString* name, const Il2CppType* type)
 	{
@@ -997,12 +1103,215 @@ namespace
 		{
 			return GetReplacementAssets(il2cpp_string_new(fileName.data()), type);
 		}
+
 		auto obj = reinterpret_cast<decltype(assetbundle_load_asset_hook)*>(assetbundle_load_asset_orig)(_this, name, type);
-		if (obj->klass->name == "GameObject"s)
+
+		if (g_dump_texture)
 		{
-			// ReplaceGameObjectTextures(obj);
+			if (obj->klass->name == "GameObject"s)
+			{
+				// ReplaceGameObjectTextures(obj);
+				auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize * (*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(obj->klass, "GetComponentsInternal", 6)->methodPointer;
+
+				auto array = getComponents(obj, reinterpret_cast<Il2CppType*>(GetRuntimeType(
+					"UnityEngine.CoreModule.dll", "UnityEngine", "Object")), true, true, true, false, nullptr);
+
+				if (array)
+				{
+					for (int j = 0; j < array->max_length; j++)
+					{
+						auto obj =
+							il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, long index)>("mscorlib.dll", "System", "Array", "GetValue", 1)(&array->obj, j);
+						if (!obj) continue;
+
+						if (obj && obj->klass && obj->klass->name != "Transform"s)
+						{
+							if (obj->klass->name == "Image"s)
+							{
+
+								auto sprite = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(obj->klass, "get_sprite", 0)->methodPointer(obj);
+
+								if (sprite)
+								{
+									auto texture = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(sprite->klass, "get_texture", 0)->methodPointer(sprite);
+
+									DumpTexture2D(texture, "Image");
+								}
+							}
+
+							if (obj->klass->name == "RawImage"s)
+							{
+								auto texture = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(obj->klass, "get_texture", 0)->methodPointer(obj);
+
+								if (texture)
+								{
+									DumpTexture2D(texture, "RawImage");
+								}
+							}
+
+							if (obj->klass->name == "MeshRenderer"s)
+							{
+								auto material = reinterpret_cast<decltype(Renderer_get_material_hook)*>(Renderer_get_material_orig)(obj);
+								auto mainTexture = reinterpret_cast<decltype(Material_GetTextureImpl_hook)*>(Material_GetTextureImpl_orig)(material, Shader_PropertyToID(il2cpp_string_new("_MainTex")));
+
+								if (mainTexture)
+								{
+									DumpTexture2D(mainTexture, "MeshRenderer");
+								}
+							}
+
+							if (obj->klass->name == "HomeSpecialMissionBannerView"s)
+							{
+								auto bannerImageField = il2cpp_class_get_field_from_name(obj->klass, "bannerImage");
+								Il2CppObject* bannerImage;
+								il2cpp_field_get_value(obj, bannerImageField, &bannerImage);
+
+								auto texture = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(bannerImage->klass, "get_texture", 0)->methodPointer(bannerImage);
+
+								if (texture)
+								{
+									DumpTexture2D(texture, "RawImage");
+								}
+							}
+						}
+					}
+				}
+			}
+
+			if (obj->klass->name == "Sprite"s)
+			{
+				auto texture = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(obj->klass, "get_texture", 0)->methodPointer(obj);
+
+				DumpTexture2D(texture, "Sprite");
+			}
+
+			if (obj->klass->name == "Image"s || obj->klass->name == "UIImage"s)
+			{
+				auto sprite = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(obj->klass, "get_sprite", 0)->methodPointer(obj);
+
+				auto texture = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(sprite->klass, "get_texture", 0)->methodPointer(sprite);
+
+				DumpTexture2D(texture, "Image");
+			}
+
+			if (obj->klass->name == "Sprite"s)
+			{
+				auto texture = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(obj->klass, "get_texture", 0)->methodPointer(obj);
+
+				DumpTexture2D(texture, "Sprite");
+			}
+
+			if (obj->klass->name == "Texture2D"s)
+			{
+				DumpTexture2D(obj, "Texture2D");
+			}
 		}
+
+		if (obj->klass->name == "HowToPlayPopupResourceConfig"s)
+		{
+			auto itemsField = il2cpp_class_get_field_from_name(obj->klass, "items");
+			Il2CppArraySize_t<HowToPlayPopupResourceConfig_Item>* items;
+			il2cpp_field_get_value(obj, itemsField, &items);
+
+			for (int i = 0; i < items->max_length; i++)
+			{
+				if (g_dump_texture)
+				{
+					DumpTexture2D(items->vector[i].Image, "Texture2D");
+				}
+
+				auto texture = items->vector[i].Image;
+
+				auto uobject_name = uobject_get_name(texture);
+				if (!local::wide_u8(uobject_name->start_char).empty())
+				{
+					auto newTexture = GetReplacementAssets(
+						uobject_name,
+						(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
+
+					if (newTexture)
+					{
+						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
+							(newTexture, 32);
+						items->vector[i].Image = newTexture;
+					}
+				}
+			}
+		}
+
 		return obj;
+	}
+
+	void* ImageConversion_LoadImage_orig = nullptr;
+	bool ImageConversion_LoadImage_hook(Il2CppObject* tex, Il2CppArraySize_t<char>* data, bool markNonReadable)
+	{
+		auto hashData = hash<string_view>()(string_view(data->vector, data->max_length));
+		auto fileName = to_string(hashData) + ".png";
+
+		if (g_dump_texture)
+		{
+			if (!filesystem::exists("TextureDump"))
+			{
+				filesystem::create_directory("TextureDump");
+			}
+
+			if (!filesystem::exists("TextureDump/DownloadedTexture2D"))
+			{
+				filesystem::create_directory("TextureDump/DownloadedTexture2D");
+			}
+
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*, Il2CppArraySize_t<char>*)>("mscorlib.dll", "System.IO", "File", "WriteAllBytes", 2)(il2cpp_string_new(("TextureDump/DownloadedTexture2D/" + fileName).data()), data);
+		}
+
+
+		if (find_if(replaceAssetNames.begin(), replaceAssetNames.end(), [fileName](const string& item)
+			{
+				return item.find(fileName) != string::npos;
+			}) != replaceAssetNames.end())
+		{
+			auto texture = GetReplacementAssets(il2cpp_string_new(fileName.data()), (Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
+
+			auto width = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(texture->klass, "get_width", 0)->methodPointer(texture);
+
+			auto height = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(texture->klass, "get_height", 0)->methodPointer(texture);
+
+			auto renderTexture = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(int, int, int, int, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "GetTemporary", 5)(width, height, 0, 0, 1);
+
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Graphics", "Blit", 2)(texture, renderTexture);
+
+			auto previous = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "get_active", -1)();
+
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "set_active", 1)(renderTexture);
+
+			auto readableTexture = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(readableTexture->klass, ".ctor", 2)->methodPointer(readableTexture, width, height);
+
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Rect_t, int, int)>(readableTexture->klass, "ReadPixels", 3)->methodPointer(readableTexture, Rect_t{ 0, 0, static_cast<float>(width), static_cast<float>(height) }, 0, 0);
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(readableTexture->klass, "Apply", 0)->methodPointer(readableTexture);
+
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "set_active", 1)(previous);
+
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "ReleaseTemporary", 1)(renderTexture);
+
+			auto method = il2cpp_symbols::get_method("UnityEngine.ImageConversionModule.dll", "UnityEngine", "ImageConversion", "EncodeToPNG", 1);
+
+			void** params = new void* [1];
+			params[0] = readableTexture;
+
+			Il2CppException* exception;
+
+			auto pngData = reinterpret_cast<Il2CppArraySize_t<char>*>(il2cpp_runtime_invoke(method, nullptr, params, &exception));
+
+			if (exception)
+			{
+				il2cpp_raise_exception(exception);
+				return reinterpret_cast<decltype(ImageConversion_LoadImage_hook)*>(ImageConversion_LoadImage_orig)(tex, data, markNonReadable);
+			}
+
+			return reinterpret_cast<decltype(ImageConversion_LoadImage_hook)*>(ImageConversion_LoadImage_orig)(tex, pngData, markNonReadable);
+		}
+
+		return reinterpret_cast<decltype(ImageConversion_LoadImage_hook)*>(ImageConversion_LoadImage_orig)(tex, data, markNonReadable);
 	}
 
 	void* assetbundle_unload_orig = nullptr;
@@ -1117,7 +1426,7 @@ namespace
 		return texture2D;
 	}
 
-	void* Renderer_get_material_orig = nullptr;
+	// void* Renderer_get_material_orig = nullptr;
 	Il2CppObject* Renderer_get_material_hook(Il2CppObject* _this)
 	{
 		auto material = reinterpret_cast<decltype(Renderer_get_material_hook)*>(Renderer_get_material_orig)(_this);
@@ -1281,7 +1590,7 @@ namespace
 		reinterpret_cast<decltype(Material_SetTextureI4_hook)*>(Material_SetTextureI4_orig)(_this, nameID, texture);
 	}
 
-	void* Material_GetTextureImpl_orig = nullptr;
+	// void* Material_GetTextureImpl_orig = nullptr;
 	Il2CppObject* Material_GetTextureImpl_hook(Il2CppObject* _this, int nameID)
 	{
 		auto texture = reinterpret_cast<decltype(Material_GetTextureImpl_hook)*>(Material_GetTextureImpl_orig)(_this, nameID);
@@ -1319,23 +1628,27 @@ namespace
 		reinterpret_cast<decltype(Material_SetTextureImpl_hook)*>(Material_SetTextureImpl_orig)(_this, nameID, texture);
 	}
 
-	void* CharaPropRendererAccessor_SetTexture_orig = nullptr;
-	void CharaPropRendererAccessor_SetTexture_hook(Il2CppObject* _this, Il2CppObject* texture)
+	void* RawImage_get_mainTexture_orig = nullptr;
+	Il2CppObject* RawImage_get_mainTexture_hook(Il2CppObject* _this)
 	{
-		if (!local::wide_u8(uobject_get_name(texture)->start_char).empty())
+		auto texture = reinterpret_cast<decltype(RawImage_get_mainTexture_hook)*>(RawImage_get_mainTexture_orig)(_this);
+		if (texture)
 		{
-			auto newTexture = GetReplacementAssets(
-				uobject_get_name(texture),
-				(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-			if (newTexture)
+			auto uobject_name = uobject_get_name(texture);
+			if (!local::wide_u8(uobject_name->start_char).empty())
 			{
-				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
-					(newTexture, 32);
-				reinterpret_cast<decltype(CharaPropRendererAccessor_SetTexture_hook)*>(CharaPropRendererAccessor_SetTexture_orig)(_this, newTexture);
-				return;
+				auto newTexture = GetReplacementAssets(
+					uobject_name,
+					(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
+				if (newTexture)
+				{
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
+						(newTexture, 32);
+					return newTexture;
+				}
 			}
 		}
-		reinterpret_cast<decltype(CharaPropRendererAccessor_SetTexture_hook)*>(CharaPropRendererAccessor_SetTexture_orig)(_this, texture);
+		return texture;
 	}
 
 	void* GameObject_GetComponent_orig = nullptr;
@@ -1894,7 +2207,7 @@ namespace
 		return msg.wParam;
 	}
 
-	void DumpLocalization()
+	void DumpLocalization(string fileName = "localization.json")
 	{
 		if (g_dump_localization)
 		{
@@ -1957,7 +2270,7 @@ namespace
 				document.Accept(writer);
 
 				fstream localization;
-				localization.open("localization.json", ios::out);
+				localization.open(fileName, ios::out);
 				localization << buffer.GetString() << endl;
 				localization.close();
 			}
@@ -2151,9 +2464,7 @@ namespace
 			"UnityEngine.AssetBundleModule.dll", "UnityEngine",
 			"AssetBundle", "LoadAsset", 2);
 
-		get_all_asset_names = il2cpp_symbols::get_method_pointer<Il2CppArraySize * (*)(Il2CppObject * _this)>(
-			"UnityEngine.AssetBundleModule.dll", "UnityEngine",
-			"AssetBundle", "GetAllAssetNames", 0);
+		get_all_asset_names = il2cpp_resolve_icall_type<Il2CppArraySize * (*)(Il2CppObject * _this)>("UnityEngine.AssetBundle::GetAllAssetNames()");
 
 		uobject_get_name = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject * uObject)>(
 			"UnityEngine.CoreModule.dll", "UnityEngine",
@@ -2232,7 +2543,7 @@ namespace
 			"TMP_Text", "GetTextElement", 5
 		);
 
-		auto UITextMeshProUGUI_get_text_addr = il2cpp_symbols::get_method_pointer(
+		auto UITextMeshProUGUI_get_text_RawImage_get_texture_Image_get_sprite_addr = il2cpp_symbols::get_method_pointer(
 			"ENTERPRISE.UI.dll", "ENTERPRISE.UI",
 			"UITextMeshProUGUI", "get_text", 0
 		);
@@ -2388,6 +2699,8 @@ namespace
 
 		ADD_HOOK(LocalizationManager_LoadAsync, "ENTERPRISE.Localization.LocalizationManager::LoadAsync at %p\n");
 
+		DumpLocalization("localization_local.json");
+
 		OverwriteLocalization();
 
 		// ADD_HOOK(CatalogDB_ctor, "Limelight.CatalogDB::ctor at %p\n");
@@ -2411,7 +2724,7 @@ namespace
 		// hook UnityEngine.TextGenerator::PopulateWithErrors to modify text
 		ADD_HOOK(populate_with_errors, "UnityEngine.TextGenerator::PopulateWithErrors at %p\n");
 
-		ADD_HOOK(UITextMeshProUGUI_get_text, "ENTERPRISE.UI.UITextMeshProUGUI::get_text at %p\n");
+		ADD_HOOK(UITextMeshProUGUI_get_text_RawImage_get_texture_Image_get_sprite, "ENTERPRISE.UI.UITextMeshProUGUI::get_text\nUnityEngine.UI.Image::get_sprite\nUnityEngine.UI.RawImage::get_texture at %p\n");
 		ADD_HOOK(UITextMeshProUGUI_set_text, "ENTERPRISE.UI.UITextMeshProUGUI::set_text at %p\n");
 
 		if (g_unlock_size)
@@ -2448,8 +2761,6 @@ namespace
 		}
 	}
 
-	Il2CppDelegate* moviePlayerResize = nullptr;
-
 	void patch_after_criware()
 	{
 		auto set_resolution_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution_Injected()");
@@ -2470,6 +2781,8 @@ namespace
 			"GetResult", 0);
 
 		auto assetbundle_load_asset_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAsset_Internal(System.String,System.Type)");
+
+		auto ImageConversion_LoadImage_addr = il2cpp_resolve_icall("UnityEngine.ImageConversion::LoadImage()");
 
 		auto assetbundle_unload_addr = il2cpp_symbols::get_method_pointer("UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle", "Unload", 1);
 
@@ -2497,10 +2810,12 @@ namespace
 
 		auto Material_set_mainTexture_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Material", "set_mainTexture", 1);
 
+		auto RawImage_get_mainTexture_addr = il2cpp_symbols::get_method_pointer("UnityEngine.UI.dll", "UnityEngine.UI", "RawImage", "get_mainTexture", 0);
+
 		auto Material_SetTextureI4_addr = il2cpp_symbols::find_method("UnityEngine.CoreModule.dll", "UnityEngine", "Material", [](const MethodInfo* method)
 			{
 				return method->name == "SetTexture"s &&
-					method->parameters->parameter_type->type == IL2CPP_TYPE_I4;
+					method->parameters[0].parameter_type->type == IL2CPP_TYPE_I4;
 			});
 
 		auto Material_GetTextureImpl_addr = il2cpp_resolve_icall("UnityEngine.Material::GetTextureImpl(System.String,System.Int32)");
@@ -2607,10 +2922,15 @@ namespace
 
 		ADD_HOOK(resources_load, "UnityEngine.Resources::Load at %p\n");
 
-		if (!replaceAssets.empty())
+		if (g_dump_texture || !replaceAssets.empty())
 		{
 			ADD_HOOK(assetbundle_load_asset, "UnityEngine.AssetBundle::LoadAsset at %p\n");
 
+			ADD_HOOK(ImageConversion_LoadImage, "UnityEngine.ImageConversion::LoadImage at %p\n");
+		}
+
+		if (!replaceAssets.empty())
+		{
 			ADD_HOOK(GameObject_GetComponent, "UnityEngine.GameObject::GetComponent at %p\n");
 
 			// ADD_HOOK(GameObject_GetComponentFastPath, "UnityEngine.GameObject::GetComponentFastPath at %p\n");
@@ -2636,6 +2956,8 @@ namespace
 			ADD_HOOK(Material_get_mainTexture, "UnityEngine.Material::get_mainTexture at %p\n");
 
 			ADD_HOOK(Material_set_mainTexture, "UnityEngine.Material::set_mainTexture at %p\n");
+
+			ADD_HOOK(RawImage_get_mainTexture, "UnityEngine.UI.RawImage::get_mainTexture at %p\n");
 
 			ADD_HOOK(Material_SetTextureI4, "UnityEngine.Material::SetTexture at %p\n");
 

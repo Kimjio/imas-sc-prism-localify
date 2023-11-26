@@ -9,6 +9,7 @@ extern void start_console();
 bool g_dump_entries = false;
 bool g_dump_localization = false;
 bool g_dump_il2cpp = false;
+bool g_dump_texture = false;
 bool g_enable_logger = false;
 bool g_enable_console = false;
 int g_max_fps = -1;
@@ -87,6 +88,10 @@ namespace
 			if (document.HasMember("dumpIl2Cpp"))
 			{
 				g_dump_il2cpp = document["dumpIl2Cpp"].GetBool();
+			}
+			if (document.HasMember("dumpTexture"))
+			{
+				g_dump_texture = document["dumpTexture"].GetBool();
 			}
 			if (document.HasMember("maxFps"))
 			{

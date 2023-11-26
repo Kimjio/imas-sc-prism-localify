@@ -40,6 +40,7 @@ struct ReplaceAsset {
 extern bool g_dump_entries;
 extern bool g_dump_localization;
 extern bool g_dump_il2cpp;
+extern bool g_dump_texture;
 extern bool g_enable_logger;
 extern bool g_enable_console;
 extern int g_max_fps;

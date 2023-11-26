@@ -46,13 +46,14 @@ workspace "imas-sc-prism-localify"
 	}
 
 	toolset "clang"
-	buildoptions "/std:c++latest"
 	systemversion "latest"
 	symbols "On"
 	staticruntime "On"
 	editandcontinue "Off"
 	warnings "Off"
 	characterset "ASCII"
+	cppdialect "C++20"
+	cdialect "C17"
 
 	flags {
 		"NoIncrementalLink",
