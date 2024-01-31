@@ -530,41 +530,9 @@ struct LocalizationKey
 	int Id;
 };
 
-struct CourseBaseObjectContext
+struct FrameRate
 {
-	Il2CppObject* coursePrefab;
-	Il2CppObject* courseGrassFurPrefab;
-	Il2CppObject* monitorRenderTexture;
-	Il2CppArraySize* swapTextures;
-	Il2CppArraySize* swapSubTextures;
-	Il2CppObject* postFilmSetGroup;
-	Il2CppObject* grassParam;
-};
-
-struct RaceLoaderManagerCourceContext
-{
-	int courseId;
-	int timeEnum;
-	int seasonEnum;
-	int turfGoalGate;
-	int turfGoalFlower;
-	int dirtGoalGate;
-	int dirtGoalFlower;
-	int skydomeCourseId;
-	int skydomeSeasonEnum;
-	int skydomeWeatherEnum;
-	int skydomeTimeEnum;
-	int audienceEnum;
-	int audienceWeatherEnum;
-	int audienceSeasonEnum;
-	int treeWeaterEnum;
-	int treeTimeEnum;
-	int RotationCategoryEnum;
-	int lightProbeId;
-	Il2CppArraySize* materialTeturePairs;
-	Il2CppArraySize* materialSubTexturePairs;
-	bool halfStartGate;
-	int CourseStartGateBaseId;
+	int m_Rate;
 };
 
 struct MoviePlayerHandle

@@ -314,20 +314,33 @@ namespace
 			return nullptr;
 		}
 
+		auto instanceField = il2cpp_class_get_field_from_name(klass, "instance");
+		if (!instanceField)
+		{
+			auto get_Instance = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)()>(klass, "get_Instance", -1);
+			if (get_Instance)
+			{
+				return get_Instance->methodPointer();
+			}
+
+			return nullptr;
+		}
+
+		Il2CppObject* instance;
+		il2cpp_field_static_get_value(instanceField, &instance);
+
+		if (instance)
+		{
+			return instance;
+		}
+
 		auto get_Instance = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)()>(klass, "get_Instance", -1);
 		if (get_Instance)
 		{
 			return get_Instance->methodPointer();
 		}
 
-		auto instanceField = il2cpp_class_get_field_from_name(klass, "_instance");
-		if (!instanceField)
-		{
-			return nullptr;
-		}
-		Il2CppObject* instance;
-		il2cpp_field_static_get_value(instanceField, &instance);
-		return instance;
+		return nullptr;
 	}
 
 	Boolean GetBoolean(bool value)
@@ -555,6 +568,25 @@ namespace
 			}
 		}
 
+		if (uMsg == WM_SIZE)
+		{
+			// auto renderManager = GetSingletonInstance(il2cpp_symbols::get_class("Prism.Rendering.Runtime.dll", "PRISM.Rendering", "RenderManager"));
+
+			//if (renderManager)
+			//{
+			//	RECT windowRect;
+			//	GetWindowRect(hWnd, &windowRect);
+			//	int windowWidth = windowRect.right - windowRect.left;
+			//	int windowHeight = windowRect.bottom - windowRect.top;
+
+			//	auto widthField = il2cpp_class_get_field_from_name(renderManager->klass, "DefaultScreenWidth");
+			//	auto heightField = il2cpp_class_get_field_from_name(renderManager->klass, "DefaultScreenHeight");
+
+			//	// il2cpp_field_static_set_value(widthField, &windowWidth);
+			//	// il2cpp_field_static_set_value(heightField, &windowHeight);
+			//}
+		}
+
 		if (uMsg == WM_CLOSE)
 		{
 			ExitProcess(0);
@@ -673,16 +705,10 @@ namespace
 		reinterpret_cast<decltype(UITextMeshProUGUI_Awake_hook)*>(UITextMeshProUGUI_Awake_orig)(_this);
 	}
 
-	void* RenderFrameRate_set_FrameRate_orig = nullptr;
-	void RenderFrameRate_set_FrameRate_hook(Il2CppObject* _this, int value)
+	void* RenderFrameRate_ChangeFrameRate_orig = nullptr;
+	void RenderFrameRate_ChangeFrameRate_hook(int value)
 	{
-		reinterpret_cast<decltype(RenderFrameRate_set_FrameRate_hook)*>(RenderFrameRate_set_FrameRate_orig)(_this, g_max_fps);
-	}
-
-	void* RenderFrameRate_AllocateScoped_orig = nullptr;
-	Il2CppObject* RenderFrameRate_AllocateScoped_hook(Il2CppObject* _this, int value)
-	{
-		return reinterpret_cast<decltype(RenderFrameRate_AllocateScoped_hook)*>(RenderFrameRate_AllocateScoped_orig)(_this, g_max_fps);
+		reinterpret_cast<decltype(RenderFrameRate_ChangeFrameRate_hook)*>(RenderFrameRate_ChangeFrameRate_orig)(g_max_fps);
 	}
 
 	void* SystemUtility_set_FrameRate_orig = nullptr;
@@ -777,6 +803,7 @@ namespace
 
 	Il2CppObject* Material_GetTextureImpl_hook(Il2CppObject* _this, int nameID);
 	void Material_SetTextureImpl_hook(Il2CppObject* _this, int nameID, Il2CppObject* texture);
+	bool (*Material_HasProperty)(Il2CppObject* _this, int nameID);
 
 	bool (*uobject_IsNativeObjectAlive)(Il2CppObject* uObject);
 
@@ -798,20 +825,23 @@ namespace
 		{
 			return;
 		}
-		auto mainTexture = Material_GetTextureImpl_hook(material, Shader_PropertyToID(il2cpp_string_new("_MainTex")));
-		if (mainTexture)
+		if (Material_HasProperty(material, Shader_PropertyToID(il2cpp_string_new("_MainTex"))))
 		{
-			auto uobject_name = uobject_get_name(mainTexture);
-			if (!local::wide_u8(uobject_name->start_char).empty())
+			auto mainTexture = Material_GetTextureImpl_hook(material, Shader_PropertyToID(il2cpp_string_new("_MainTex")));
+			if (mainTexture)
 			{
-				auto newTexture = GetReplacementAssets(
-					uobject_name,
-					(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-				if (newTexture)
+				auto uobject_name = uobject_get_name(mainTexture);
+				if (!local::wide_u8(uobject_name->start_char).empty())
 				{
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
-						(newTexture, 32);
-					Material_SetTextureImpl_hook(material, Shader_PropertyToID(il2cpp_string_new("_MainTex")), newTexture);
+					auto newTexture = GetReplacementAssets(
+						uobject_name,
+						(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
+					if (newTexture)
+					{
+						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
+							(newTexture, 32);
+						Material_SetTextureImpl_hook(material, Shader_PropertyToID(il2cpp_string_new("_MainTex")), newTexture);
+					}
 				}
 			}
 		}
@@ -927,56 +957,6 @@ namespace
 					} while (false);
 				}
 			}
-		}
-	}
-
-	void ReplaceGameObjectTextures(Il2CppObject* gameObject)
-	{
-		auto getComponent = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppType*)>(gameObject->klass, "GetComponent", 1)->methodPointer;
-		auto getComponents =
-			il2cpp_class_get_method_from_name_type<Il2CppArraySize * (*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(gameObject->klass, "GetComponentsInternal", 6)->methodPointer;
-
-		auto array = getComponents(gameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"UnityEngine.CoreModule.dll", "UnityEngine", "Object")), true, true, true, false, nullptr);
-
-		if (array)
-		{
-			for (int j = 0; j < array->max_length; j++)
-			{
-				auto obj =
-					il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, long index)>("mscorlib.dll", "System", "Array", "GetValue", 1)(&array->obj, j);
-				if (!obj) continue;
-				/*if (obj && obj->klass && obj->klass->name != "Transform"s)
-				{
-					cout << "GameObject -> " << obj->klass->name << endl;
-				}*/
-
-				if ("AssetHolder"s == obj->klass->name)
-				{
-					ReplaceAssetHolderTextures(obj);
-				}
-			}
-		}
-
-		auto rawImages = getComponents(gameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"umamusume.dll", "Gallop", "RawImageCommon")), true, true, true, false, nullptr);
-
-		if (rawImages && rawImages->max_length)
-		{
-			for (int i = 0; i < rawImages->max_length; i++)
-			{
-				auto rawImage = reinterpret_cast<Il2CppObject*>(rawImages->vector[i]);
-				if (rawImage)
-				{
-					ReplaceRawImageTexture(rawImage);
-				}
-			}
-		}
-
-		auto assetholder = getComponent(gameObject, (Il2CppType*)GetRuntimeType("umamusume.dll", "Gallop", "AssetHolder"));
-		if (assetholder)
-		{
-			ReplaceAssetHolderTextures(assetholder);
 		}
 	}
 
@@ -1103,7 +1083,6 @@ namespace
 		{
 			if (obj->klass->name == "GameObject"s)
 			{
-				// ReplaceGameObjectTextures(obj);
 				auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize * (*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(obj->klass, "GetComponentsInternal", 6)->methodPointer;
 
 				auto array = getComponents(obj, reinterpret_cast<Il2CppType*>(GetRuntimeType(
@@ -1145,11 +1124,15 @@ namespace
 							if (obj->klass->name == "MeshRenderer"s)
 							{
 								auto material = reinterpret_cast<decltype(Renderer_get_material_hook)*>(Renderer_get_material_orig)(obj);
-								auto mainTexture = reinterpret_cast<decltype(Material_GetTextureImpl_hook)*>(Material_GetTextureImpl_orig)(material, Shader_PropertyToID(il2cpp_string_new("_MainTex")));
 
-								if (mainTexture)
+								if (material)
 								{
-									DumpTexture2D(mainTexture, "MeshRenderer");
+									auto mainTexture = reinterpret_cast<decltype(Material_GetTextureImpl_hook)*>(Material_GetTextureImpl_orig)(material, Shader_PropertyToID(il2cpp_string_new("_MainTex")));
+
+									if (mainTexture)
+									{
+										DumpTexture2D(mainTexture, "MeshRenderer");
+									}
 								}
 							}
 
@@ -2616,13 +2599,9 @@ namespace
 			"Text", "set_verticalOverflow", 1
 		);
 
-		auto RenderFrameRate_set_FrameRate_addr = il2cpp_symbols::get_method_pointer(
+		auto RenderFrameRate_ChangeFrameRate_addr = il2cpp_symbols::get_method_pointer(
 			"Prism.Legacy.dll", "PRISM.Legacy.Render3D", "RenderFrameRate",
-			"set_FrameRate", 1);
-
-		auto RenderFrameRate_AllocateScoped_addr = il2cpp_symbols::get_method_pointer(
-			"Prism.Legacy.dll", "PRISM.Legacy.Render3D", "RenderFrameRate",
-			"AllocateScoped", 1);
+			"ChangeFrameRate", 1);
 
 		auto SystemUtility_set_FrameRate_addr = il2cpp_symbols::get_method_pointer(
 			"ENTERPRISE.Kernel.dll", "ENTERPRISE", "SystemUtility",
@@ -2659,6 +2638,8 @@ namespace
 			"LoadFromFile", 3);
 
 		Shader_PropertyToID = il2cpp_symbols::get_method_pointer<int (*)(Il2CppString*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Shader", "PropertyToID", 1);
+
+		Material_HasProperty = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Material", "HasProperty", 1);
 
 		auto CriMana_Player_SetFile_addr = il2cpp_symbols::get_method_pointer("CriMw.CriWare.Runtime.dll", "CriWare.CriMana", "Player", "SetFile", 3);
 
@@ -2743,8 +2724,7 @@ namespace
 		if (g_max_fps > -1)
 		{
 			// break 30-40fps limit
-			ADD_HOOK(RenderFrameRate_set_FrameRate, "PRISM.Legacy.Render3D.RenderFrameRate::set_FrameRate at %p\n");
-			ADD_HOOK(RenderFrameRate_AllocateScoped, "PRISM.Legacy.Render3D.RenderFrameRate::AllocateScoped at %p\n");
+			ADD_HOOK(RenderFrameRate_ChangeFrameRate, "PRISM.Legacy.Render3D.RenderFrameRate::ChangeFrameRate at %p\n");
 			ADD_HOOK(SystemUtility_set_FrameRate, "ENTERPRISE.SystemUtility::set_FrameRate at %p\n");
 			ADD_HOOK(RenderManager_SetResolutionRate, "PRISM.Rendering.RenderManager::SetResolutionRate at %p\n");
 			ADD_HOOK(RenderManager_GetResolutionRate, "PRISM.Rendering.RenderManager::GetResolutionRate at %p\n");
@@ -2765,15 +2745,6 @@ namespace
 	void patch_after_criware()
 	{
 		auto set_resolution_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution_Injected()");
-
-		auto MovieManager_SetImageUvRect_addr = il2cpp_symbols::get_method_pointer(
-			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "SetImageUvRect", 2);
-
-		auto MovieManager_SetScreenSize_addr = il2cpp_symbols::get_method_pointer(
-			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "SetScreenSize", 2);
-
-		auto MoviePlayerForUI_AdjustScreenSize_addr = il2cpp_symbols::get_method_pointer(
-			"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerForUI", "AdjustScreenSize", 2);
 
 		auto assetbundle_LoadFromFile_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadFromFile_Internal(System.String,System.UInt32,System.UInt64)");
 
@@ -2928,10 +2899,7 @@ namespace
 			ADD_HOOK(assetbundle_load_asset, "UnityEngine.AssetBundle::LoadAsset at %p\n");
 
 			ADD_HOOK(ImageConversion_LoadImage, "UnityEngine.ImageConversion::LoadImage at %p\n");
-		}
 
-		if (!replaceAssets.empty())
-		{
 			ADD_HOOK(GameObject_GetComponent, "UnityEngine.GameObject::GetComponent at %p\n");
 
 			// ADD_HOOK(GameObject_GetComponentFastPath, "UnityEngine.GameObject::GetComponentFastPath at %p\n");
