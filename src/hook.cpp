@@ -2367,6 +2367,62 @@ namespace
 		return reinterpret_cast<decltype(TweenManager_Update_hook)*>(TweenManager_Update_orig)(_this, updateType, deltaTime * g_ui_animation_scale, independentTime * g_ui_animation_scale);
 	}
 
+	void* AssembleCharacter_ApplyParam_orig = nullptr;
+	void AssembleCharacter_ApplyParam_hook(Il2CppObject* mdl, float height, float bust, float head, float arm, float hand)
+	{
+		if (g_character_param_height_ratio > -1)
+		{
+			height = g_character_params_is_fixed_ratio ? g_character_param_height_ratio : height * g_character_param_height_ratio;
+
+			if (height > 1.2 && !g_character_params_unlimit_ratio)
+			{
+				height = 1;
+			}
+		}
+
+		if (g_character_param_bust_ratio > -1)
+		{
+			bust = g_character_params_is_fixed_ratio ? g_character_param_bust_ratio : bust * g_character_param_bust_ratio;
+
+			if (bust > 1 && !g_character_params_unlimit_ratio)
+			{
+				bust = 1;
+			}
+		}
+
+		if (g_character_param_head_ratio > -1)
+		{
+			head = g_character_params_is_fixed_ratio ? g_character_param_head_ratio : head * g_character_param_head_ratio;
+
+			if (head > 1 && !g_character_params_unlimit_ratio)
+			{
+				head = 1;
+			}
+		}
+
+		if (g_character_param_arm_ratio > -1)
+		{
+			arm = g_character_params_is_fixed_ratio ? g_character_param_arm_ratio : arm * g_character_param_arm_ratio;
+
+			if (arm > 1 && !g_character_params_unlimit_ratio)
+			{
+				arm = 1;
+			}
+		}
+
+		if (g_character_param_hand_ratio > -1)
+		{
+			hand = g_character_params_is_fixed_ratio ? g_character_param_hand_ratio : hand * g_character_param_hand_ratio;
+
+			if (hand > 1 && !g_character_params_unlimit_ratio)
+			{
+				hand = 1;
+			}
+		}
+
+		reinterpret_cast<decltype(AssembleCharacter_ApplyParam_hook)*>(AssembleCharacter_ApplyParam_orig)(mdl, height, bust, head, arm, hand);
+	}
+
 	void* LiveMVPresenter_OnApplicationFocus_orig = nullptr;
 	void LiveMVPresenter_OnApplicationFocus_hook(Il2CppObject* _this, bool hasFocus)
 	{
@@ -2675,6 +2731,10 @@ namespace
 			"ENTERPRISE.Kernel.dll", "ENTERPRISE", "TimeUtility",
 			"ToExpiredTimeText", 2);
 
+		auto AssembleCharacter_ApplyParam_addr = il2cpp_symbols::get_method_pointer(
+			"PRISM.Legacy.dll", "PRISM", "AssembleCharacter",
+			"ApplyParam", 6);
+
 		auto LiveMVPresenter_OnApplicationFocus_addr = il2cpp_symbols::get_method_pointer(
 			"PRISM.Legacy.dll", "PRISM.Live", "LiveMVPresenter",
 			"OnApplicationFocus", 1);
@@ -2686,6 +2746,8 @@ namespace
 		// ADD_HOOK(TimeUtility_ToExpiredTimeText, "ENTERPRISE.TimeUtility::ToExpiredTimeText at %p\n");
 
 		ADD_HOOK(LiveMVPresenter_OnApplicationFocus, "PRISM.Live.LiveMVPresenter::OnApplicationFocus at %p\n");
+
+		ADD_HOOK(AssembleCharacter_ApplyParam, "PRISM.AssembleCharacter::ApplyParam at %p\n");
 
 		ADD_HOOK(Global_SystemReset, "PRISM.Global::SystemReset at %p\n");
 

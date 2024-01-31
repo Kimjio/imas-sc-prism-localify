@@ -17,6 +17,13 @@ bool g_unlock_size = false;
 float g_ui_scale = 1.0f;
 float g_ui_animation_scale = 1.0f;
 float g_resolution_3d_scale = 1.0f;
+bool g_character_params_unlimit_ratio = false;
+bool g_character_params_is_fixed_ratio = false;
+float g_character_param_height_ratio = -1.0f;
+float g_character_param_bust_ratio = -1.0f;
+float g_character_param_head_ratio = -1.0f;
+float g_character_param_arm_ratio = -1.0f;
+float g_character_param_hand_ratio = -1.0f;
 bool g_replace_to_custom_font = false;
 std::string g_font_assetbundle_path;
 std::string g_font_asset_name;
@@ -110,6 +117,34 @@ namespace
 			if (document.HasMember("resolution3dScale"))
 			{
 				g_resolution_3d_scale = document["resolution3dScale"].GetFloat();
+			}
+			if (document.HasMember("characterParamsUnlimitRatio"))
+			{
+				g_character_params_unlimit_ratio = document["characterParamsUnlimitRatio"].GetBool();
+			}
+			if (document.HasMember("characterParamsIsFixedRatio"))
+			{
+				g_character_params_is_fixed_ratio = document["characterParamsIsFixedRatio"].GetBool();
+			}
+			if (document.HasMember("characterParamHeightRatio"))
+			{
+				g_character_param_height_ratio = document["characterParamHeightRatio"].GetFloat();
+			}
+			if (document.HasMember("characterParamBustRatio"))
+			{
+				g_character_param_bust_ratio = document["characterParamBustRatio"].GetFloat();
+			}
+			if (document.HasMember("characterParamHeadRatio"))
+			{
+				g_character_param_head_ratio = document["characterParamHeadRatio"].GetFloat();
+			}
+			if (document.HasMember("characterParamArmRatio"))
+			{
+				g_character_param_arm_ratio = document["characterParamArmRatio"].GetFloat();
+			}
+			if (document.HasMember("characterParamHandRatio"))
+			{
+				g_character_param_hand_ratio = document["characterParamHandRatio"].GetFloat();
 			}
 			if (document.HasMember("replaceToCustomFont"))
 			{
