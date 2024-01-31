@@ -2367,6 +2367,12 @@ namespace
 		return reinterpret_cast<decltype(TweenManager_Update_hook)*>(TweenManager_Update_orig)(_this, updateType, deltaTime * g_ui_animation_scale, independentTime * g_ui_animation_scale);
 	}
 
+	void* LiveMVPresenter_OnApplicationFocus_orig = nullptr;
+	void LiveMVPresenter_OnApplicationFocus_hook(Il2CppObject* _this, bool hasFocus)
+	{
+		reinterpret_cast<decltype(LiveMVPresenter_OnApplicationFocus_hook)*>(LiveMVPresenter_OnApplicationFocus_orig)(_this, true);
+	}
+
 	void* load_scene_internal_orig = nullptr;
 	void* load_scene_internal_hook(Il2CppString* sceneName, int sceneBuildIndex, void* parameters, bool mustCompleteNextFrame)
 	{
@@ -2669,11 +2675,17 @@ namespace
 			"ENTERPRISE.Kernel.dll", "ENTERPRISE", "TimeUtility",
 			"ToExpiredTimeText", 2);
 
+		auto LiveMVPresenter_OnApplicationFocus_addr = il2cpp_symbols::get_method_pointer(
+			"PRISM.Legacy.dll", "PRISM.Live", "LiveMVPresenter",
+			"OnApplicationFocus", 1);
+
 		auto load_scene_internal_addr = il2cpp_resolve_icall("UnityEngine.SceneManagement.SceneManager::LoadSceneAsyncNameIndexInternal_Injected(System.String,System.Int32,UnityEngine.SceneManagement.LoadSceneParameters&,System.bool)");
 
 #pragma endregion
 
 		// ADD_HOOK(TimeUtility_ToExpiredTimeText, "ENTERPRISE.TimeUtility::ToExpiredTimeText at %p\n");
+
+		ADD_HOOK(LiveMVPresenter_OnApplicationFocus, "PRISM.Live.LiveMVPresenter::OnApplicationFocus at %p\n");
 
 		ADD_HOOK(Global_SystemReset, "PRISM.Global::SystemReset at %p\n");
 
