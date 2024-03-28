@@ -839,29 +839,29 @@ namespace
 				{
 					hasMainTex = true;
 					break;
-					}
 				}
+			}
 
 			if (!hasMainTex)
-	{
-			return;
-		}
+			{
+				return;
+			}
 
 			auto mainTexture = Material_GetTextureImpl_hook(material, mainTexId);
 			if (mainTexture)
-					{
+			{
 				auto uobject_name = uobject_get_name(mainTexture);
-					if (!local::wide_u8(uobject_name->start_char).empty())
+				if (!local::wide_u8(uobject_name->start_char).empty())
+				{
+					auto newTexture = GetReplacementAssets(
+						uobject_name,
+						(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
+					if (newTexture)
 					{
-						auto newTexture = GetReplacementAssets(
-							uobject_name,
-							(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-						if (newTexture)
-						{
-							il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
-								(newTexture, 32);
+						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
+							(newTexture, 32);
 						Material_SetTextureImpl_hook(material, mainTexId, newTexture);
-				}
+					}
 				}
 			}
 		}
@@ -1078,14 +1078,14 @@ namespace
 								{
 									if (Material_HasProperty(material, Shader_PropertyToID(il2cpp_string_new("_MainTex"))))
 									{
-									auto mainTexture = reinterpret_cast<decltype(Material_GetTextureImpl_hook)*>(Material_GetTextureImpl_orig)(material, Shader_PropertyToID(il2cpp_string_new("_MainTex")));
+										auto mainTexture = reinterpret_cast<decltype(Material_GetTextureImpl_hook)*>(Material_GetTextureImpl_orig)(material, Shader_PropertyToID(il2cpp_string_new("_MainTex")));
 
-									if (mainTexture)
-									{
-										DumpTexture2D(mainTexture, "MeshRenderer");
+										if (mainTexture)
+										{
+											DumpTexture2D(mainTexture, "MeshRenderer");
+										}
 									}
 								}
-							}
 							}
 
 							if (obj->klass->name == "HomeSpecialMissionBannerView"s)
@@ -1586,7 +1586,7 @@ namespace
 		if (component)
 		{
 			// cout << "Component: " << component->klass->name << endl;
-			}
+		}
 		return component;
 	}
 
@@ -2259,16 +2259,14 @@ namespace
 		}
 	}
 
-	void* LocalizationManager_LoadAsync_orig = nullptr;
-	UniTask LocalizationManager_LoadAsync_hook(Il2CppObject* _this, Il2CppObject* cancellationToken)
+	void* LocalizationManager_Load_orig = nullptr;
+	void LocalizationManager_Load_hook(Il2CppObject* _this)
 	{
-		auto task = reinterpret_cast<decltype(LocalizationManager_LoadAsync_hook)*>(LocalizationManager_LoadAsync_orig)(_this, cancellationToken);
+		reinterpret_cast<decltype(LocalizationManager_Load_hook)*>(LocalizationManager_Load_orig)(_this);
 
 		DumpLocalization();
 
 		OverwriteLocalization();
-
-		return task;
 	}
 
 	void* TimeUtility_ToExpiredTimeText_orig = nullptr;
@@ -2659,9 +2657,9 @@ namespace
 			"DOTween.dll", "DG.Tweening.Core", "TweenManager", "Update", 3
 		);
 
-		auto LocalizationManager_LoadAsync_addr = il2cpp_symbols::get_method_pointer(
+		auto LocalizationManager_Load_addr = il2cpp_symbols::get_method_pointer(
 			"ENTERPRISE.Localization.dll", "ENTERPRISE.Localization", "LocalizationManager",
-			"LoadAsync", 1);
+			"Load", 0);
 
 		auto Global_SystemReset_addr = il2cpp_symbols::get_method_pointer(
 			"PRISM.ResourceManagement.dll", "PRISM", "Global",
@@ -2695,7 +2693,7 @@ namespace
 
 		ADD_HOOK(Global_SystemReset, "PRISM.Global::SystemReset at %p\n");
 
-		ADD_HOOK(LocalizationManager_LoadAsync, "ENTERPRISE.Localization.LocalizationManager::LoadAsync at %p\n");
+		ADD_HOOK(LocalizationManager_Load, "ENTERPRISE.Localization.LocalizationManager::Load at %p\n");
 
 		DumpLocalization("localization_local.json");
 
