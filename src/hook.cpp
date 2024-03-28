@@ -825,78 +825,32 @@ namespace
 		{
 			return;
 		}
-		if (Material_HasProperty(material, Shader_PropertyToID(il2cpp_string_new("_MainTex"))))
+
+		auto mainTexId = Shader_PropertyToID(il2cpp_string_new("_MainTex"));
+		if (Material_HasProperty(material, mainTexId))
 		{
-			auto mainTexture = Material_GetTextureImpl_hook(material, Shader_PropertyToID(il2cpp_string_new("_MainTex")));
-			if (mainTexture)
+			auto ids = il2cpp_resolve_icall_type<Il2CppArraySize_t<int>*(*)(Il2CppObject*)>("UnityEngine.Material::GetTexturePropertyNameIDs")(material);
+
+			bool hasMainTex = false;
+
+			for (int i = 0; i < ids->max_length; i++)
 			{
-				auto uobject_name = uobject_get_name(mainTexture);
-				if (!local::wide_u8(uobject_name->start_char).empty())
+				if (ids->vector[i] == mainTexId)
 				{
-					auto newTexture = GetReplacementAssets(
-						uobject_name,
-						(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-					if (newTexture)
-					{
-						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
-							(newTexture, 32);
-						Material_SetTextureImpl_hook(material, Shader_PropertyToID(il2cpp_string_new("_MainTex")), newTexture);
+					hasMainTex = true;
+					break;
 					}
 				}
-			}
-		}
-	}
 
-	void ReplaceAssetHolderTextures(Il2CppObject* holder)
+			if (!hasMainTex)
 	{
-		if (!uobject_IsNativeObjectAlive(holder))
-		{
 			return;
 		}
-		auto objectList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(holder->klass, "get_ObjectList", 0)->methodPointer(holder);
-		FieldInfo* itemsField = il2cpp_class_get_field_from_name(objectList->klass, "_items");
-		Il2CppArraySize* arr;
-		il2cpp_field_get_value(objectList, itemsField, &arr);
-		for (int i = 0; i < arr->max_length; i++)
-		{
-			auto pair = (Il2CppObject*)arr->vector[i];
-			if (!pair) continue;
-			auto field = il2cpp_class_get_field_from_name(pair->klass, "Value");
-			Il2CppObject* obj;
-			il2cpp_field_get_value(pair, field, &obj);
-			if (obj)
-			{
-				//cout << "AssetHolder: " << i << " " << obj->klass->name << endl;
-				if (obj->klass->name == "GameObject"s && uobject_IsNativeObjectAlive(obj))
-				{
-					// auto getComponent = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppType*)>(component->klass, "GetComponent", 1)->methodPointer;
-					auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize * (*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(obj->klass, "GetComponentsInternal", 6)->methodPointer;
 
-					auto array = getComponents(obj, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-						"UnityEngine.CoreModule.dll", "UnityEngine", "Object")), true, true, true, false, nullptr);
-
-					if (array)
+			auto mainTexture = Material_GetTextureImpl_hook(material, mainTexId);
+			if (mainTexture)
 					{
-						for (int j = 0; j < array->max_length; j++)
-						{
-							auto obj =
-								il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, long index)>("mscorlib.dll", "System", "Array", "GetValue", 1)(&array->obj, j);
-							if (!obj) continue;
-							/*if (obj && obj->klass && obj->klass->name != "Transform"s)
-							{
-								cout << obj->klass->name << endl;
-							}*/
-							if (string(obj->klass->name).find("MeshRenderer") != string::npos)
-							{
-								ReplaceRendererTexture(obj);
-							}
-						}
-					}
-				}
-				if (obj->klass->name == "Texture2D"s)
-				{
-					auto uobject_name = uobject_get_name(obj);
-					//cout << "Texture2D: " << local::wide_u8(uobject_name->start_char) << endl;
+				auto uobject_name = uobject_get_name(mainTexture);
 					if (!local::wide_u8(uobject_name->start_char).empty())
 					{
 						auto newTexture = GetReplacementAssets(
@@ -906,13 +860,8 @@ namespace
 						{
 							il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
 								(newTexture, 32);
-							il2cpp_field_set_value(pair, field, newTexture);
-						}
-					}
+						Material_SetTextureImpl_hook(material, mainTexId, newTexture);
 				}
-				if (obj->klass->name == "Material"s)
-				{
-					ReplaceMaterialTexture(obj);
 				}
 			}
 		}
@@ -1127,6 +1076,8 @@ namespace
 
 								if (material)
 								{
+									if (Material_HasProperty(material, Shader_PropertyToID(il2cpp_string_new("_MainTex"))))
+									{
 									auto mainTexture = reinterpret_cast<decltype(Material_GetTextureImpl_hook)*>(Material_GetTextureImpl_orig)(material, Shader_PropertyToID(il2cpp_string_new("_MainTex")));
 
 									if (mainTexture)
@@ -1134,6 +1085,7 @@ namespace
 										DumpTexture2D(mainTexture, "MeshRenderer");
 									}
 								}
+							}
 							}
 
 							if (obj->klass->name == "HomeSpecialMissionBannerView"s)
@@ -1634,11 +1586,7 @@ namespace
 		if (component)
 		{
 			// cout << "Component: " << component->klass->name << endl;
-			if ("AssetHolder"s == component->klass->name)
-			{
-				ReplaceAssetHolderTextures(component);
 			}
-		}
 		return component;
 	}
 
@@ -1675,10 +1623,6 @@ namespace
 				{
 					ReplaceMaterialTexture(material);
 				}
-			}
-			if (helper.obj->klass->name == "AssetHolder"s)
-			{
-				ReplaceAssetHolderTextures(helper.obj);
 			}
 			memmove(reinterpret_cast<void*>(oneFurtherThanResultValue - objSize), &helper, sizeof(CastHelper));
 		}
